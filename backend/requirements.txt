@@ -1,11 +1,25 @@
-fastapi
-uvicorn
-python-multipart
-langchain
-langchain-community
-langchain-huggingface
-langchain-chroma
-chromadb
-pypdf
-deep-translator
-sentence-transformers
+# Sarathi v3.0 — Pinned Dependencies
+# =====================================
+# Core API and server stack
+fastapi==0.115.12
+uvicorn==0.34.2
+python-multipart==0.0.20
+
+# LangChain ecosystem
+langchain==0.3.25
+langchain-community==0.3.24
+langchain-huggingface==0.1.2
+langchain-chroma==0.2.4
+langchain-groq==0.3.2
+langchain-text-splitters==0.3.8
+langgraph==0.4.5
+
+# Vector database
+chromadb==0.6.3
+
+# Models and loaders
+sentence-transformers==4.1.0
+pypdf==5.6.0
+
+# Utilities
+python-dotenv==1.1.0
