@@ -1,9 +1,0 @@
-
-streamlit
-deep-translator
-langchain
-langchain-community
-langchain-google-genai
-langchain-text-splitters
-chromadb
-pypdf
