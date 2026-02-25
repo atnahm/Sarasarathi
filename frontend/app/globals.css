@@ -1,0 +1,601 @@
+@import "tailwindcss";
+
+/* Hide Next.js Dev Indicator Component ('1 Issue') */
+nextjs-portal {
+  display: none !important;
+}
+
+:root {
+  --background: #f0f4f9;
+  --foreground: #1a1a2e;
+  --accent: #22d3ee;
+  --glass: rgba(255, 255, 255, 0.65);
+  --glass-border: rgba(255, 255, 255, 0.3);
+
+  /* Theme Base */
+  --app-bg: linear-gradient(135deg, #e8f0fe 0%, #f0f4f9 30%, #fef3f2 60%, #f0f4f9 100%);
+  --sidebar-bg: rgba(15, 23, 42, 0.8);
+  --sidebar-border: rgba(255, 255, 255, 0.06);
+}
+
+/* ═════════ THEMES ═════════ */
+
+.theme-pink {
+  --background: #fdf2f8;
+  --foreground: #831843;
+  --app-bg: linear-gradient(135deg, #fdf2f8 0%, #fbcfe8 50%, #fdf2f8 100%);
+  --sidebar-bg: rgba(131, 24, 67, 0.85);
+  --sidebar-border: rgba(255, 255, 255, 0.2);
+  --color-cyan-50: var(--color-pink-50);
+  --color-cyan-100: var(--color-pink-100);
+  --color-cyan-200: var(--color-pink-200);
+  --color-cyan-300: var(--color-pink-300);
+  --color-cyan-400: var(--color-pink-400);
+  --color-cyan-500: var(--color-pink-500);
+  --color-cyan-600: var(--color-pink-600);
+  --color-cyan-700: var(--color-pink-700);
+  --color-cyan-800: var(--color-pink-800);
+  --color-cyan-900: var(--color-pink-900);
+  --color-cyan-950: var(--color-pink-950);
+  --color-blue-50: var(--color-rose-50);
+  --color-blue-100: var(--color-rose-100);
+  --color-blue-200: var(--color-rose-200);
+  --color-blue-300: var(--color-rose-300);
+  --color-blue-400: var(--color-rose-400);
+  --color-blue-500: var(--color-rose-500);
+  --color-blue-600: var(--color-rose-600);
+  --color-blue-700: var(--color-rose-700);
+  --color-blue-800: var(--color-rose-800);
+  --color-blue-900: var(--color-rose-900);
+  --color-blue-950: var(--color-rose-950);
+  --color-indigo-50: var(--color-fuchsia-50);
+  --color-indigo-100: var(--color-fuchsia-100);
+  --color-indigo-200: var(--color-fuchsia-200);
+  --color-indigo-300: var(--color-fuchsia-300);
+  --color-indigo-400: var(--color-fuchsia-400);
+  --color-indigo-500: var(--color-fuchsia-500);
+  --color-indigo-600: var(--color-fuchsia-600);
+  --color-indigo-700: var(--color-fuchsia-700);
+  --color-indigo-800: var(--color-fuchsia-800);
+  --color-indigo-900: var(--color-fuchsia-900);
+  --color-indigo-950: var(--color-fuchsia-950);
+  --color-slate-50: var(--color-stone-50);
+  --color-slate-100: var(--color-stone-100);
+  --color-slate-200: var(--color-stone-200);
+  --color-slate-300: var(--color-stone-300);
+  --color-slate-400: var(--color-stone-400);
+  --color-slate-500: var(--color-stone-500);
+  --color-slate-600: var(--color-stone-600);
+  --color-slate-700: var(--color-stone-700);
+  --color-slate-800: var(--color-stone-800);
+  --color-slate-900: var(--color-stone-900);
+  --color-slate-950: var(--color-stone-950);
+}
+
+.theme-startup {
+  --background: #f0fdf4;
+  --foreground: #064e3b;
+  --app-bg: linear-gradient(135deg, #f0fdf4 0%, #d1fae5 50%, #f0fdf4 100%);
+  --sidebar-bg: rgba(6, 78, 59, 0.85);
+  --sidebar-border: rgba(255, 255, 255, 0.2);
+  --color-cyan-50: var(--color-emerald-50);
+  --color-cyan-100: var(--color-emerald-100);
+  --color-cyan-200: var(--color-emerald-200);
+  --color-cyan-300: var(--color-emerald-300);
+  --color-cyan-400: var(--color-emerald-400);
+  --color-cyan-500: var(--color-emerald-500);
+  --color-cyan-600: var(--color-emerald-600);
+  --color-cyan-700: var(--color-emerald-700);
+  --color-cyan-800: var(--color-emerald-800);
+  --color-cyan-900: var(--color-emerald-900);
+  --color-cyan-950: var(--color-emerald-950);
+  --color-blue-50: var(--color-teal-50);
+  --color-blue-100: var(--color-teal-100);
+  --color-blue-200: var(--color-teal-200);
+  --color-blue-300: var(--color-teal-300);
+  --color-blue-400: var(--color-teal-400);
+  --color-blue-500: var(--color-teal-500);
+  --color-blue-600: var(--color-teal-600);
+  --color-blue-700: var(--color-teal-700);
+  --color-blue-800: var(--color-teal-800);
+  --color-blue-900: var(--color-teal-900);
+  --color-blue-950: var(--color-teal-950);
+  --color-indigo-50: var(--color-cyan-50);
+  --color-indigo-100: var(--color-cyan-100);
+  --color-indigo-200: var(--color-cyan-200);
+  --color-indigo-300: var(--color-cyan-300);
+  --color-indigo-400: var(--color-cyan-400);
+  --color-indigo-500: var(--color-cyan-500);
+  --color-indigo-600: var(--color-cyan-600);
+  --color-indigo-700: var(--color-cyan-700);
+  --color-indigo-800: var(--color-cyan-800);
+  --color-indigo-900: var(--color-cyan-900);
+  --color-indigo-950: var(--color-cyan-950);
+  --color-slate-50: var(--color-zinc-50);
+  --color-slate-100: var(--color-zinc-100);
+  --color-slate-200: var(--color-zinc-200);
+  --color-slate-300: var(--color-zinc-300);
+  --color-slate-400: var(--color-zinc-400);
+  --color-slate-500: var(--color-zinc-500);
+  --color-slate-600: var(--color-zinc-600);
+  --color-slate-700: var(--color-zinc-700);
+  --color-slate-800: var(--color-zinc-800);
+  --color-slate-900: var(--color-zinc-900);
+  --color-slate-950: var(--color-zinc-950);
+}
+
+.theme-morale {
+  --background: #fffbeb;
+  --foreground: #78350f;
+  --app-bg: linear-gradient(135deg, #fffbeb 0%, #fef3c7 50%, #fffbeb 100%);
+  --sidebar-bg: rgba(120, 53, 15, 0.85);
+  --sidebar-border: rgba(255, 255, 255, 0.2);
+  --color-cyan-50: var(--color-amber-50);
+  --color-cyan-100: var(--color-amber-100);
+  --color-cyan-200: var(--color-amber-200);
+  --color-cyan-300: var(--color-amber-300);
+  --color-cyan-400: var(--color-amber-400);
+  --color-cyan-500: var(--color-amber-500);
+  --color-cyan-600: var(--color-amber-600);
+  --color-cyan-700: var(--color-amber-700);
+  --color-cyan-800: var(--color-amber-800);
+  --color-cyan-900: var(--color-amber-900);
+  --color-cyan-950: var(--color-amber-950);
+  --color-blue-50: var(--color-orange-50);
+  --color-blue-100: var(--color-orange-100);
+  --color-blue-200: var(--color-orange-200);
+  --color-blue-300: var(--color-orange-300);
+  --color-blue-400: var(--color-orange-400);
+  --color-blue-500: var(--color-orange-500);
+  --color-blue-600: var(--color-orange-600);
+  --color-blue-700: var(--color-orange-700);
+  --color-blue-800: var(--color-orange-800);
+  --color-blue-900: var(--color-orange-900);
+  --color-blue-950: var(--color-orange-950);
+  --color-indigo-50: var(--color-yellow-50);
+  --color-indigo-100: var(--color-yellow-100);
+  --color-indigo-200: var(--color-yellow-200);
+  --color-indigo-300: var(--color-yellow-300);
+  --color-indigo-400: var(--color-yellow-400);
+  --color-indigo-500: var(--color-yellow-500);
+  --color-indigo-600: var(--color-yellow-600);
+  --color-indigo-700: var(--color-yellow-700);
+  --color-indigo-800: var(--color-yellow-800);
+  --color-indigo-900: var(--color-yellow-900);
+  --color-indigo-950: var(--color-yellow-950);
+  --color-slate-50: var(--color-orange-50);
+  --color-slate-100: var(--color-orange-100);
+  --color-slate-200: var(--color-orange-200);
+  --color-slate-300: var(--color-orange-300);
+  --color-slate-400: var(--color-orange-400);
+  --color-slate-500: var(--color-orange-500);
+  --color-slate-600: var(--color-orange-600);
+  --color-slate-700: var(--color-orange-700);
+  --color-slate-800: var(--color-orange-800);
+  --color-slate-900: var(--color-orange-900);
+  --color-slate-950: var(--color-orange-950);
+}
+
+.theme-dark {
+  --background: #0f172a;
+  --foreground: #f8fafc;
+  --glass: rgba(15, 23, 42, 0.75);
+  --glass-border: rgba(255, 255, 255, 0.1);
+  --app-bg: linear-gradient(135deg, #020617 0%, #0f172a 50%, #020617 100%);
+  --sidebar-bg: rgba(2, 6, 23, 0.85);
+  --sidebar-border: rgba(255, 255, 255, 0.05);
+  --color-cyan-50: var(--color-indigo-50);
+  --color-cyan-100: var(--color-indigo-100);
+  --color-cyan-200: var(--color-indigo-200);
+  --color-cyan-300: var(--color-indigo-300);
+  --color-cyan-400: var(--color-indigo-400);
+  --color-cyan-500: var(--color-indigo-500);
+  --color-cyan-600: var(--color-indigo-600);
+  --color-cyan-700: var(--color-indigo-700);
+  --color-cyan-800: var(--color-indigo-800);
+  --color-cyan-900: var(--color-indigo-900);
+  --color-cyan-950: var(--color-indigo-950);
+  --color-blue-50: var(--color-violet-50);
+  --color-blue-100: var(--color-violet-100);
+  --color-blue-200: var(--color-violet-200);
+  --color-blue-300: var(--color-violet-300);
+  --color-blue-400: var(--color-violet-400);
+  --color-blue-500: var(--color-violet-500);
+  --color-blue-600: var(--color-violet-600);
+  --color-blue-700: var(--color-violet-700);
+  --color-blue-800: var(--color-violet-800);
+  --color-blue-900: var(--color-violet-900);
+  --color-blue-950: var(--color-violet-950);
+  --color-indigo-50: var(--color-purple-50);
+  --color-indigo-100: var(--color-purple-100);
+  --color-indigo-200: var(--color-purple-200);
+  --color-indigo-300: var(--color-purple-300);
+  --color-indigo-400: var(--color-purple-400);
+  --color-indigo-500: var(--color-purple-500);
+  --color-indigo-600: var(--color-purple-600);
+  --color-indigo-700: var(--color-purple-700);
+  --color-indigo-800: var(--color-purple-800);
+  --color-indigo-900: var(--color-purple-900);
+  --color-indigo-950: var(--color-purple-950);
+  --color-slate-50: var(--color-slate-50);
+  --color-slate-100: var(--color-slate-100);
+  --color-slate-200: var(--color-slate-200);
+  --color-slate-300: var(--color-slate-300);
+  --color-slate-400: var(--color-slate-400);
+  --color-slate-500: var(--color-slate-500);
+  --color-slate-600: var(--color-slate-600);
+  --color-slate-700: var(--color-slate-700);
+  --color-slate-800: var(--color-slate-800);
+  --color-slate-900: var(--color-slate-900);
+  --color-slate-950: var(--color-slate-950);
+}
+
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --font-sans: var(--font-geist-sans);
+  --font-mono: var(--font-geist-mono);
+}
+
+body {
+  background: var(--background);
+  color: var(--foreground);
+  font-family: 'Google Sans', 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  -webkit-font-smoothing: antialiased;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+/* ── Scrollbar ── */
+::-webkit-scrollbar {
+  width: 5px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #c1c1c1;
+  border-radius: 100px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #999;
+}
+
+/* ═══════════════════════════════════════
+   ANIMATIONS
+   ═══════════════════════════════════════ */
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(16px) scale(0.98);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes scaleIn {
+  from {
+    opacity: 0;
+    transform: scale(0.92);
+  }
+
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+@keyframes slideUp {
+  from {
+    opacity: 0;
+    transform: translateY(30px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes float {
+
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+
+  50% {
+    transform: translateY(-6px);
+  }
+}
+
+@keyframes pulseGlow {
+
+  0%,
+  100% {
+    box-shadow: 0 0 0 0 rgba(34, 211, 238, 0.3);
+  }
+
+  50% {
+    box-shadow: 0 0 20px 4px rgba(34, 211, 238, 0.08);
+  }
+}
+
+@keyframes breathe {
+
+  0%,
+  100% {
+    transform: scale(1);
+  }
+
+  50% {
+    transform: scale(1.03);
+  }
+}
+
+@keyframes shimmer {
+  0% {
+    background-position: -200% 0;
+  }
+
+  100% {
+    background-position: 200% 0;
+  }
+}
+
+@keyframes typingDot {
+
+  0%,
+  60%,
+  100% {
+    transform: translateY(0);
+    opacity: 0.3;
+  }
+
+  30% {
+    transform: translateY(-8px);
+    opacity: 1;
+  }
+}
+
+@keyframes ripple {
+  0% {
+    transform: scale(0);
+    opacity: 0.5;
+  }
+
+  100% {
+    transform: scale(4);
+    opacity: 0;
+  }
+}
+
+@keyframes gentleBob {
+
+  0%,
+  100% {
+    transform: translateY(0) rotate(0deg);
+  }
+
+  25% {
+    transform: translateY(-3px) rotate(0.5deg);
+  }
+
+  75% {
+    transform: translateY(2px) rotate(-0.5deg);
+  }
+}
+
+@keyframes glassShine {
+  0% {
+    background-position: -100% 0;
+  }
+
+  100% {
+    background-position: 200% 0;
+  }
+}
+
+/* Classes */
+.animate-fade-in-up {
+  animation: fadeInUp 0.45s cubic-bezier(.21, 1.02, .73, 1) both;
+}
+
+.animate-fade-in {
+  animation: fadeIn 0.35s ease-out both;
+}
+
+.animate-scale-in {
+  animation: scaleIn 0.4s cubic-bezier(.21, 1.02, .73, 1) both;
+}
+
+.animate-slide-up {
+  animation: slideUp 0.5s cubic-bezier(.21, 1.02, .73, 1) both;
+}
+
+.animate-float {
+  animation: float 3s ease-in-out infinite;
+}
+
+.animate-breathe {
+  animation: breathe 4s ease-in-out infinite;
+}
+
+.animate-gentle-bob {
+  animation: gentleBob 5s ease-in-out infinite;
+}
+
+.typing-dot {
+  animation: typingDot 1.4s ease-in-out infinite;
+}
+
+.typing-dot:nth-child(2) {
+  animation-delay: 0.2s;
+}
+
+.typing-dot:nth-child(3) {
+  animation-delay: 0.4s;
+}
+
+/* ═══════════════════════════════════════
+   GLASSMORPHISM
+   ═══════════════════════════════════════ */
+.glass {
+  background: rgba(255, 255, 255, 0.55);
+  backdrop-filter: blur(16px) saturate(180%);
+  -webkit-backdrop-filter: blur(16px) saturate(180%);
+  border: 1px solid rgba(255, 255, 255, 0.35);
+}
+
+.glass-strong {
+  background: rgba(255, 255, 255, 0.72);
+  backdrop-filter: blur(24px) saturate(200%);
+  -webkit-backdrop-filter: blur(24px) saturate(200%);
+  border: 1px solid rgba(255, 255, 255, 0.45);
+}
+
+.glass-dark {
+  background: var(--sidebar-bg);
+  backdrop-filter: blur(20px) saturate(180%);
+  -webkit-backdrop-filter: blur(20px) saturate(180%);
+  border: 1px solid var(--sidebar-border);
+}
+
+.glass-bubble {
+  background: rgba(255, 255, 255, 0.6);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgba(255, 255, 255, 0.5);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.06), inset 0 1px 0 rgba(255, 255, 255, 0.6);
+}
+
+.glass-input {
+  background: rgba(255, 255, 255, 0.7);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid rgba(255, 255, 255, 0.4);
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.04), inset 0 1px 0 rgba(255, 255, 255, 0.8);
+}
+
+/* ═══════════════════════════════════════
+   CLAY / NEUMORPHISM
+   ═══════════════════════════════════════ */
+.clay {
+  background: linear-gradient(145deg, #f5f7fa, #e8ecf2);
+  box-shadow: 6px 6px 16px rgba(0, 0, 0, 0.08), -4px -4px 12px rgba(255, 255, 255, 0.9);
+  border: 1px solid rgba(255, 255, 255, 0.6);
+}
+
+.clay-sm {
+  background: linear-gradient(145deg, #f5f7fa, #eef1f6);
+  box-shadow: 4px 4px 10px rgba(0, 0, 0, 0.06), -3px -3px 8px rgba(255, 255, 255, 0.85);
+  border: 1px solid rgba(255, 255, 255, 0.5);
+}
+
+.clay-inset {
+  background: linear-gradient(145deg, #e8ecf2, #f0f4f9);
+  box-shadow: inset 3px 3px 8px rgba(0, 0, 0, 0.06), inset -3px -3px 8px rgba(255, 255, 255, 0.9);
+}
+
+.clay-pressed {
+  background: linear-gradient(145deg, #e4e8ee, #edf1f7);
+  box-shadow: inset 2px 2px 6px rgba(0, 0, 0, 0.07), inset -2px -2px 6px rgba(255, 255, 255, 0.8);
+}
+
+.clay-hover {
+  transition: all 0.25s cubic-bezier(.21, 1.02, .73, 1);
+}
+
+.clay-hover:hover {
+  transform: translateY(-2px);
+  box-shadow: 8px 8px 20px rgba(0, 0, 0, 0.1), -5px -5px 15px rgba(255, 255, 255, 0.95);
+}
+
+.clay-hover:active {
+  transform: translateY(0px);
+  box-shadow: inset 2px 2px 6px rgba(0, 0, 0, 0.06), inset -2px -2px 6px rgba(255, 255, 255, 0.8);
+}
+
+/* ═══════════════════════════════════════
+   INTERACTIVE EFFECTS
+   ═══════════════════════════════════════ */
+.hover-lift {
+  transition: transform 0.22s cubic-bezier(.21, 1.02, .73, 1), box-shadow 0.22s ease;
+}
+
+.hover-lift:hover {
+  transform: translateY(-2px) scale(1.005);
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.08);
+}
+
+.hover-lift:active {
+  transform: translateY(0) scale(0.995);
+}
+
+.prompt-chip {
+  transition: all 0.22s cubic-bezier(.21, 1.02, .73, 1);
+  cursor: pointer;
+}
+
+.prompt-chip:hover {
+  transform: translateY(-3px) scale(1.02);
+}
+
+.prompt-chip:active {
+  transform: translateY(0) scale(0.97);
+}
+
+/* Glass shine on hover */
+.glass-shine {
+  position: relative;
+  overflow: hidden;
+}
+
+.glass-shine::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 50%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.15), transparent);
+  transition: left 0.5s ease;
+}
+
+.glass-shine:hover::after {
+  left: 100%;
+}
+
+/* Gradient text */
+.text-gradient-cyan {
+  background: linear-gradient(135deg, #22d3ee, #3b82f6, #6366f1);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.text-gradient-orange {
+  background: linear-gradient(135deg, #f97316, #ef4444);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
