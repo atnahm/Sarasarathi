@@ -9,13 +9,13 @@ python-multipart==0.0.20
 langchain==0.3.25
 langchain-community==0.3.24
 langchain-huggingface==0.1.2
-langchain-chroma==0.2.4
+langchain-chroma
 langchain-groq==0.3.2
 langchain-text-splitters==0.3.8
 langgraph==0.4.5
 
 # Vector database
-chromadb==0.6.3
+chromadb
 
 # Models and loaders
 sentence-transformers==4.1.0
