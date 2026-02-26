@@ -1,3 +1,12 @@
+---
+title: Sarathi
+emoji: 🚀
+colorFrom: blue
+colorTo: indigo
+sdk: docker
+pinned: false
+app_port: 7860
+---
 # Sarathi: Public Scheme Guide (Decoupled Architecture)
 
 Sarathi is an AI-powered official scheme assistant designed to help users quickly extract answers from official scheme PDF documents. It supports queries in Assamese and English, translating the user's intent to English for the underlying open-source Large Language Models (LLMs) and returning accurate, document-grounded context.
