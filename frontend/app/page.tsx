@@ -1,14 +1,13 @@
 'use client';
 
 import { useState, useRef, useEffect, useCallback } from 'react';
-import { Settings, X } from 'lucide-react';
 
 /* ═══════════════════════════════════════════════════
    Bilingual UI
    ═══════════════════════════════════════════════════ */
 const UI = {
   English: {
-    brand: 'Sarasarathi',
+    brand: 'Sarathi',
     tagline: 'Public Scheme Assistant',
     sourcesTitle: 'Sources',
     addSource: 'Add PDF source',
@@ -23,10 +22,10 @@ const UI = {
     englishRefLabel: 'English reference:',
     filesSelected: 'files selected',
     chips: [
-      'Summarize the key points of this document',
-      'Generate a timeline of events',
-      'Create a study guide from these sources',
-      'Explain the core concepts in simple words',
+      'What schemes are in this document?',
+      'Summarise the eligibility criteria',
+      'What documents do I need to apply?',
+      'Explain the benefits in simple words',
     ],
     // Profile Form
     profileBtnActive: 'Profile Active',
@@ -80,7 +79,7 @@ const UI = {
 /* ═══════════════════════════════════════════════════
    Logo
    ═══════════════════════════════════════════════════ */
-const SarasarathiLogo = ({ size = 36, className = '' }: { size?: number; className?: string }) => (
+const SarathiLogo = ({ size = 36, className = '' }: { size?: number; className?: string }) => (
   <div className={`relative ${className}`} style={{ width: size, height: size }}>
     <svg viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg" width={size} height={size}>
       <circle cx="24" cy="24" r="22" stroke="url(#lg)" strokeWidth="2.5" fill="none" opacity="0.3" />
@@ -105,15 +104,6 @@ const SarasarathiLogo = ({ size = 36, className = '' }: { size?: number; classNa
 type Message = { id: string; role: 'user' | 'assistant'; content: string; sources?: string[]; english_ref?: string | null; };
 type UploadedDoc = { name: string; chunks: number };
 type SourceCandidate = { id: string; title: string; url: string; snippet: string; content: string; selected?: boolean; };
-type ModelConfig = {
-  model_name: string;
-  api_key: string;
-  base_url: string;
-  temperature: number;
-  max_tokens: number;
-  chunk_size: number;
-  chunk_overlap: number;
-};
 type UserProfile = {
   age?: string;
   gender?: string;
@@ -145,17 +135,6 @@ export default function ChatPage() {
   const [showProfileForm, setShowProfileForm] = useState(false);
   const [appTheme, setAppTheme] = useState('default');
 
-  const [showSettings, setShowSettings] = useState(false);
-  const [modelConfig, setModelConfig] = useState<ModelConfig>({
-    model_name: 'gemini/gemini-2.5-flash',
-    api_key: '',
-    base_url: '',
-    temperature: 0.1,
-    max_tokens: 1024,
-    chunk_size: 1000,
-    chunk_overlap: 200,
-  });
-
   const bottomRef = useRef<HTMLDivElement>(null);
   const fileRef = useRef<HTMLInputElement>(null);
   const t = UI[language];
@@ -167,19 +146,6 @@ export default function ChatPage() {
     return `${baseUrl.replace(/\/$/, '')}${endpoint}`;
   };
 
-  useEffect(() => {
-    // Load config from localStorage on mount
-    const saved = localStorage.getItem('sarasarathi_model_config');
-    if (saved) {
-      try { setModelConfig(JSON.parse(saved)); } catch (e) {}
-    }
-  }, []);
-
-  const saveModelConfig = (config: ModelConfig) => {
-    setModelConfig(config);
-    localStorage.setItem('sarasarathi_model_config', JSON.stringify(config));
-  };
-
   useEffect(() => { bottomRef.current?.scrollIntoView({ behavior: 'smooth' }); }, [messages, isLoading]);
 
   const handleUpload = useCallback(async () => {
@@ -187,11 +153,6 @@ export default function ChatPage() {
     setUploadState('uploading'); setUploadMsg('');
     const fd = new FormData();
     for (let i = 0; i < files.length; i++) fd.append('files', files[i]);
-
-    // Append chunking parameters from modelConfig
-    fd.append('chunk_size', modelConfig.chunk_size.toString());
-    fd.append('chunk_overlap', modelConfig.chunk_overlap.toString());
-
     try {
       const res = await fetch(getApiUrl('/upload'), { method: 'POST', body: fd });
       const data = await res.json();
@@ -305,8 +266,7 @@ export default function ChatPage() {
           query: text,
           language,
           selected_sources: selectedSources.length > 0 ? selectedSources : undefined,
-          user_profile: Object.keys(userProfile).length > 0 ? userProfile : undefined,
-          ...modelConfig
+          user_profile: Object.keys(userProfile).length > 0 ? userProfile : undefined
         }),
         signal: controller.signal,
       });
@@ -346,76 +306,6 @@ export default function ChatPage() {
   return (
     <div className={`flex h-screen overflow-hidden relative ${appTheme !== 'default' ? 'theme-' + appTheme : ''}`} style={{ background: 'var(--app-bg)' }}>
 
-      {/* Settings Modal */}
-      {showSettings && (
-        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4" onClick={() => setShowSettings(false)}>
-          <div className="bg-slate-900 border border-white/10 rounded-2xl w-full max-w-md overflow-hidden shadow-2xl" onClick={e => e.stopPropagation()}>
-            <div className="flex items-center justify-between p-4 border-b border-white/5 bg-slate-800/50">
-              <h2 className="text-sm font-bold text-white flex items-center gap-2">
-                <Settings size={16} className="text-cyan-400" /> Model Settings
-              </h2>
-              <button onClick={() => setShowSettings(false)} className="text-slate-400 hover:text-white transition-colors">
-                <X size={18} />
-              </button>
-            </div>
-            <div className="p-5 space-y-4">
-              <div>
-                <label className="block text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1.5">Model Name</label>
-                <input type="text" value={modelConfig.model_name} onChange={e => saveModelConfig({ ...modelConfig, model_name: e.target.value })}
-                  placeholder="e.g. gemini/gemini-2.5-flash"
-                  className="w-full bg-black/30 border border-white/10 rounded-lg px-3 py-2 text-sm text-white placeholder-slate-500 focus:outline-none focus:border-cyan-500/50" />
-                <p className="text-[9px] text-slate-500 mt-1">Provider prefix required (e.g. openai/gpt-4o, ollama/llama3)</p>
-              </div>
-
-              <div>
-                <label className="block text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1.5">API Key (Optional for Local)</label>
-                <input type="password" value={modelConfig.api_key} onChange={e => saveModelConfig({ ...modelConfig, api_key: e.target.value })}
-                  placeholder="sk-..."
-                  className="w-full bg-black/30 border border-white/10 rounded-lg px-3 py-2 text-sm text-white placeholder-slate-500 focus:outline-none focus:border-cyan-500/50" />
-              </div>
-
-              <div>
-                <label className="block text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1.5">Custom Base URL</label>
-                <input type="text" value={modelConfig.base_url} onChange={e => saveModelConfig({ ...modelConfig, base_url: e.target.value })}
-                  placeholder="http://localhost:11434/v1 (for Ollama)"
-                  className="w-full bg-black/30 border border-white/10 rounded-lg px-3 py-2 text-sm text-white placeholder-slate-500 focus:outline-none focus:border-cyan-500/50" />
-              </div>
-
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <label className="block text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1.5">Temperature</label>
-                  <input type="number" step="0.1" min="0" max="2" value={modelConfig.temperature} onChange={e => saveModelConfig({ ...modelConfig, temperature: parseFloat(e.target.value) || 0 })}
-                    className="w-full bg-black/30 border border-white/10 rounded-lg px-3 py-2 text-sm text-white placeholder-slate-500 focus:outline-none focus:border-cyan-500/50" />
-                </div>
-                <div>
-                  <label className="block text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1.5">Max Tokens</label>
-                  <input type="number" step="1" min="1" value={modelConfig.max_tokens} onChange={e => saveModelConfig({ ...modelConfig, max_tokens: parseInt(e.target.value) || 1024 })}
-                    className="w-full bg-black/30 border border-white/10 rounded-lg px-3 py-2 text-sm text-white placeholder-slate-500 focus:outline-none focus:border-cyan-500/50" />
-                </div>
-              </div>
-
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <label className="block text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1.5">Chunk Size</label>
-                  <input type="number" step="100" min="100" value={modelConfig.chunk_size} onChange={e => saveModelConfig({ ...modelConfig, chunk_size: parseInt(e.target.value) || 1000 })}
-                    className="w-full bg-black/30 border border-white/10 rounded-lg px-3 py-2 text-sm text-white placeholder-slate-500 focus:outline-none focus:border-cyan-500/50" />
-                </div>
-                <div>
-                  <label className="block text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1.5">Chunk Overlap</label>
-                  <input type="number" step="50" min="0" value={modelConfig.chunk_overlap} onChange={e => saveModelConfig({ ...modelConfig, chunk_overlap: parseInt(e.target.value) || 200 })}
-                    className="w-full bg-black/30 border border-white/10 rounded-lg px-3 py-2 text-sm text-white placeholder-slate-500 focus:outline-none focus:border-cyan-500/50" />
-                </div>
-              </div>
-            </div>
-            <div className="p-4 border-t border-white/5 bg-slate-800/30 flex justify-end">
-              <button onClick={() => setShowSettings(false)} className="px-4 py-2 bg-white/10 hover:bg-white/15 text-white text-sm font-medium rounded-lg transition-colors">
-                Done
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
-
       {/* Background blobs for depth */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
         <div className={`absolute -top-40 -left-40 w-[500px] h-[500px] rounded-full opacity-20 blur-3xl animate-gentle-bob ${asm ? 'bg-orange-300' : 'bg-cyan-300'}`} />
@@ -432,7 +322,7 @@ export default function ChatPage() {
         {/* Brand */}
         <div className="px-5 pt-5 pb-4 border-b border-white/[0.06]">
           <div className="flex items-center gap-3">
-            <SarasarathiLogo size={38} />
+            <SarathiLogo size={38} />
             <div>
               <h1 className="text-[16px] font-extrabold bg-gradient-to-r from-cyan-400 via-blue-400 to-indigo-400 bg-clip-text text-transparent leading-tight tracking-tight">{t.brand}</h1>
               <p className="text-[10px] text-slate-400 font-medium tracking-wide">{t.tagline}</p>
@@ -576,16 +466,8 @@ export default function ChatPage() {
           </div>
         </div>
 
-        <div className="px-5 py-3 border-t border-white/[0.04] flex flex-col gap-4 pb-6">
-          <button
-            onClick={() => setShowSettings(true)}
-            className="w-full flex items-center justify-center gap-2 py-2 text-xs font-semibold text-slate-300 bg-white/5 hover:bg-white/10 rounded-lg transition-colors border border-white/5"
-          >
-            <Settings size={14} />
-            Model Settings
-          </button>
-
-          <div className="group relative flex items-center bg-white/5 border border-white/10 rounded-full p-1 min-w-[36px] min-h-[36px] overflow-hidden transition-all duration-300 hover:w-[155px] mx-auto">
+        <div className="px-5 py-3 border-t border-white/[0.04] flex justify-center pb-6">
+          <div className="group relative flex items-center bg-white/5 border border-white/10 rounded-full p-1 min-w-[36px] min-h-[36px] overflow-hidden transition-all duration-300 hover:w-[155px]">
             {/* The default icon */}
             <div className="absolute left-1/2 -translate-x-1/2 group-hover:left-2 group-hover:translate-x-0 w-7 h-7 flex items-center justify-center text-slate-400 transition-all duration-300 pointer-events-none">
               <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><circle cx="12" cy="12" r="5" /><path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42" /></svg>
@@ -608,7 +490,7 @@ export default function ChatPage() {
         </div>
 
         <div className="px-5 py-3 border-t border-white/[0.04]">
-          <p className="text-[9px] text-slate-600 text-center font-semibold tracking-wider uppercase">Sarasarathi v3.0</p>
+          <p className="text-[9px] text-slate-600 text-center font-semibold tracking-wider uppercase">Sarathi v3.0</p>
         </div>
       </aside>
 
@@ -621,7 +503,7 @@ export default function ChatPage() {
             className="w-10 h-10 rounded-xl clay-sm clay-hover flex items-center justify-center text-slate-500 mr-3 active:scale-95 transition-transform">
             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><line x1="3" y1="12" x2="21" y2="12" /><line x1="3" y1="6" x2="21" y2="6" /><line x1="3" y1="18" x2="21" y2="18" /></svg>
           </button>
-          <SarasarathiLogo size={26} />
+          <SarathiLogo size={26} />
           <div className="flex items-center gap-2 ml-2">
             <h2 className="text-[15px] font-bold text-slate-700">{t.brand}</h2>
             {docs.length > 0 && (
@@ -647,7 +529,7 @@ export default function ChatPage() {
                 {/* Floating logo */}
                 <div className="animate-float mb-4">
                   <div className={`w-20 h-20 rounded-3xl clay flex items-center justify-center shadow-xl ${asm ? 'shadow-orange-200/30' : 'shadow-cyan-200/30'}`}>
-                    <SarasarathiLogo size={48} />
+                    <SarathiLogo size={48} />
                   </div>
                 </div>
 
@@ -676,7 +558,7 @@ export default function ChatPage() {
                     {/* Bot avatar */}
                     {m.role === 'assistant' && (
                       <div className={`w-9 h-9 rounded-xl clay-sm flex items-center justify-center shrink-0 mt-0.5 ${asm ? 'shadow-orange-200/20' : 'shadow-cyan-200/20'}`}>
-                        <SarasarathiLogo size={20} />
+                        <SarathiLogo size={20} />
                       </div>
                     )}
 
@@ -728,7 +610,7 @@ export default function ChatPage() {
                 {(isLoading || isSearching) && (
                   <div className="flex gap-3 animate-scale-in">
                     <div className="w-9 h-9 rounded-xl clay-sm flex items-center justify-center shrink-0 animate-breathe">
-                      <SarasarathiLogo size={20} />
+                      <SarathiLogo size={20} />
                     </div>
                     <div className="glass-bubble rounded-2xl rounded-tl-md px-5 py-4 flex items-center gap-2">
                       <span className={`w-2.5 h-2.5 rounded-full typing-dot ${asm ? 'bg-orange-400' : 'bg-cyan-400'}`}></span>

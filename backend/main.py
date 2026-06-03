@@ -1,5 +1,5 @@
 """
-Sarasarathi v3.0 — FastAPI Entry Point
+Sarathi v3.0 — FastAPI Entry Point
 ====================================
 Slim route definitions only. All logic lives in:
   - config.py   → env vars, singletons
@@ -13,7 +13,7 @@ import shutil
 import tempfile
 from typing import Optional, List
 
-from fastapi import FastAPI, File, UploadFile, HTTPException, Form
+from fastapi import FastAPI, File, UploadFile, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 
@@ -22,7 +22,7 @@ from langchain_text_splitters import RecursiveCharacterTextSplitter
 from langchain_chroma import Chroma
 
 from config import embeddings, CHROMA_PERSIST_DIR
-from graph import SarasarathiState, sarathi_agent
+from graph import SarathiState, sarathi_agent
 from tools import web_search_opportunities
 
 
@@ -31,7 +31,7 @@ from tools import web_search_opportunities
 # ────────────────────────────────────────────────────────────────
 
 app = FastAPI(
-    title="Sarasarathi API",
+    title="Sarathi API",
     description="Agentic RAG backend for Public Scheme Discovery — powered by LangGraph + Groq",
     version="3.0.0",
 )
@@ -46,7 +46,7 @@ app.add_middleware(
 
 @app.get("/")
 def read_root():
-    return {"status": "ok", "message": "Sarasarathi API is running smoothly!"}
+    return {"status": "ok", "message": "Sarathi API is running smoothly!"}
 
 
 # ────────────────────────────────────────────────────────────────
@@ -67,16 +67,9 @@ class SourceCandidate(BaseModel):
 
 class ChatRequest(BaseModel):
     query: str
-    language: str = "English"
+    language: str = "English"  # "English" | "Assamese"
     selected_sources: Optional[List[str]] = None
     user_profile: Optional[dict] = None
-
-    # Model configuration
-    model_name: Optional[str] = None
-    api_key: Optional[str] = None
-    base_url: Optional[str] = None
-    temperature: Optional[float] = 0.1
-    max_tokens: Optional[int] = 1024
 
 
 class ChatResponse(BaseModel):
@@ -90,11 +83,7 @@ class ChatResponse(BaseModel):
 # ────────────────────────────────────────────────────────────────
 
 @app.post("/upload")
-async def upload_documents(
-    files: List[UploadFile] = File(...),
-    chunk_size: int = Form(1000),
-    chunk_overlap: int = Form(200)
-):
+async def upload_documents(files: List[UploadFile] = File(...)):
     """
     Upload one or more PDF documents. Chunks are ADDED to ChromaDB (additive).
     Each chunk is tagged with its source filename for attribution.
@@ -116,7 +105,7 @@ async def upload_documents(
             loader = PyPDFLoader(tmp_path)
             docs = loader.load()
 
-            splitter = RecursiveCharacterTextSplitter(chunk_size=chunk_size, chunk_overlap=chunk_overlap)
+            splitter = RecursiveCharacterTextSplitter(chunk_size=1000, chunk_overlap=200)
             splits = splitter.split_documents(docs)
             splits = [s for s in splits if s.page_content.strip()]
 
@@ -156,22 +145,16 @@ async def chat(request: ChatRequest):
     May return a clarification question or a verified answer with sources.
     """
     try:
-        initial_state: SarasarathiState = {
+        initial_state: SarathiState = {
             "user_query": request.query,
             "language": request.language,
             "user_profile": request.user_profile or {},
             "missing_info": [],
             "retrieved_docs": [],
             "ephemeral_context": request.selected_sources or [],
+            "eligibility_result": {},
             "final_response": "",
             "sources": [],
-
-            # Model configs
-            "model_name": request.model_name or "gemini/gemini-2.5-flash",
-            "api_key": request.api_key,
-            "base_url": request.base_url,
-            "temperature": request.temperature or 0.1,
-            "max_tokens": request.max_tokens or 1024,
         }
 
         result = sarathi_agent.invoke(initial_state)

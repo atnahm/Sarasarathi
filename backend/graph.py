@@ -1,15 +1,16 @@
 """
-Sarasarathi v3.0 — LangGraph State Machine
+Sarathi v3.0 — LangGraph State Machine
 ========================================
 5-node agentic graph with deterministic eligibility checking.
 
 Flow:
   analyze_and_extract → decision_router
     ├─ missing info → ask_clarification → END
+    └─ ready → retrieve_context → evaluate_eligibility → generate_verified_answer → END
 """
 
 import json
-from typing import TypedDict, Optional
+from typing import TypedDict
 
 from langchain_core.messages import SystemMessage, HumanMessage
 from langgraph.graph import StateGraph, END
@@ -21,49 +22,37 @@ from prompts import (
     ANSWER_PROMPT,
     EXTRACT_THRESHOLDS_PROMPT,
 )
-from tools import query_scheme_database
+from tools import query_scheme_database, check_eligibility_math
 
 
 # ────────────────────────────────────────────────────────────────
 # State Definition
 # ────────────────────────────────────────────────────────────────
 
-class SarasarathiState(TypedDict):
+class SarathiState(TypedDict):
     user_query: str
     language: str                       # "English" | "Assamese"
     user_profile: dict                  # Extracted: age, income, occupation, gender, location
     missing_info: list                  # Fields still needed
     retrieved_docs: list                # Raw doc chunks from ChromaDB
     ephemeral_context: list             # Fetched web sources from frontend
+    eligibility_result: dict            # Output from check_eligibility_math
     final_response: str                 # The answer string to return
     sources: list                       # Page citations
-
-    # Model configuration
-    model_name: str
-    api_key: Optional[str]
-    base_url: Optional[str]
-    temperature: float
-    max_tokens: int
 
 
 # ────────────────────────────────────────────────────────────────
 # Node A: Analyze & Extract
 # ────────────────────────────────────────────────────────────────
 
-def analyze_and_extract(state: SarasarathiState) -> SarasarathiState:
+def analyze_and_extract(state: SarathiState) -> SarathiState:
     """
     Parse the user query:
     - Detect language (but keep frontend's choice as authoritative)
     - Extract profile entities (age, income, etc.)
     - Decide if clarification is needed
     """
-    llm = get_llm(
-        model_name=state.get("model_name", "gemini/gemini-2.5-flash"),
-        api_key=state.get("api_key"),
-        base_url=state.get("base_url"),
-        temperature=state.get("temperature", 0.1),
-        max_tokens=state.get("max_tokens", 1024),
-    )
+    llm = get_llm()
     
     # Format the current profile for the prompt
     current_profile = state.get("user_profile", {})
@@ -122,10 +111,10 @@ def analyze_and_extract(state: SarasarathiState) -> SarasarathiState:
 # Routing Edge
 # ────────────────────────────────────────────────────────────────
 
-def decision_router(state: SarasarathiState) -> str:
+def decision_router(state: SarathiState) -> str:
     """Route: ephemeral context bypasses retrieve_context. Missing info → clarify."""
     if state.get("ephemeral_context"):
-        return "generate_verified_answer"
+        return "evaluate_eligibility"
         
     missing = state.get("missing_info", [])
     if missing and len(missing) > 0:
@@ -137,15 +126,9 @@ def decision_router(state: SarasarathiState) -> str:
 # Node B: Ask Clarification
 # ────────────────────────────────────────────────────────────────
 
-def ask_clarification(state: SarasarathiState) -> SarasarathiState:
+def ask_clarification(state: SarathiState) -> SarathiState:
     """Generate a conversational question for missing profile data."""
-    llm = get_llm(
-        model_name=state.get("model_name", "gemini/gemini-2.5-flash"),
-        api_key=state.get("api_key"),
-        base_url=state.get("base_url"),
-        temperature=state.get("temperature", 0.1),
-        max_tokens=state.get("max_tokens", 1024),
-    )
+    llm = get_llm()
     prompt = CLARIFICATION_PROMPT.format(
         query=state["user_query"],
         language=state["language"],
@@ -166,7 +149,7 @@ def ask_clarification(state: SarasarathiState) -> SarasarathiState:
 # Node C: Retrieve Context
 # ────────────────────────────────────────────────────────────────
 
-def retrieve_context(state: SarasarathiState) -> SarasarathiState:
+def retrieve_context(state: SarathiState) -> SarathiState:
     """Query ChromaDB for relevant document chunks."""
     contents, sources = query_scheme_database(
         query=state["user_query"],
@@ -181,36 +164,99 @@ def retrieve_context(state: SarasarathiState) -> SarasarathiState:
 
 
 # ────────────────────────────────────────────────────────────────
+# Node C-bis: Evaluate Eligibility (NEW — wires the math tool)
+# ────────────────────────────────────────────────────────────────
+
+def evaluate_eligibility(state: SarathiState) -> SarathiState:
+    """
+    Extract numeric thresholds from retrieved docs via LLM,
+    then run deterministic check_eligibility_math against user_profile.
+    The LLM NEVER does the math — it only extracts thresholds.
+    """
+    user_profile = state.get("user_profile", {})
+    context = "\n\n---\n\n".join(state.get("retrieved_docs", []))
+
+    # Skip if no profile data or no context
+    has_numeric_profile = any(
+        user_profile.get(f) is not None
+        for f in ["age", "income"]
+    )
+    if not has_numeric_profile or not context.strip():
+        return {
+            **state,
+            "eligibility_result": {
+                "has_thresholds": False,
+                "checks_run": 0,
+                "all_eligible": None,
+                "results": {},
+                "summary": "No numeric profile data available for eligibility check.",
+            },
+        }
+
+    # Step 1: Ask LLM to extract thresholds from context (NOT to do math)
+    llm = get_llm()
+    extraction_prompt = EXTRACT_THRESHOLDS_PROMPT.format(context=context)
+
+    try:
+        response = llm.invoke([SystemMessage(content=extraction_prompt)])
+        raw = response.content.strip()
+        if raw.startswith("```"):
+            raw = raw.split("```")[1]
+            if raw.startswith("json"):
+                raw = raw[4:]
+        parsed = json.loads(raw)
+        thresholds = parsed.get("thresholds", {})
+    except (json.JSONDecodeError, IndexError, Exception):
+        thresholds = {}
+
+    # Step 2: Run deterministic math tool (pure Python — no LLM)
+    eligibility_result = check_eligibility_math(thresholds, user_profile)
+
+    return {
+        **state,
+        "eligibility_result": eligibility_result,
+    }
+
+
+# ────────────────────────────────────────────────────────────────
 # Node D: Generate Verified Answer
 # ────────────────────────────────────────────────────────────────
 
-def generate_verified_answer(state: SarasarathiState) -> SarasarathiState:
+def generate_verified_answer(state: SarathiState) -> SarathiState:
     """
-    Synthesize the final answer from retrieved docs.
+    Synthesize the final answer from retrieved docs + eligibility results.
+    The LLM reports the math tool's output as fact — it does NOT recalculate.
     """
-    llm = get_llm(
-        model_name=state.get("model_name", "gemini/gemini-2.5-flash"),
-        api_key=state.get("api_key"),
-        base_url=state.get("base_url"),
-        temperature=state.get("temperature", 0.1),
-        max_tokens=state.get("max_tokens", 1024),
-    )
+    llm = get_llm()
     context = "\n\n---\n\n".join(state.get("retrieved_docs", []))
 
     if not context.strip():
         disclaimer = (
-            "⚠️ Disclaimer: Sarasarathi provides informational guidance based on provided documents only."
+            "⚠️ Disclaimer: Sarathi provides informational guidance only. "
+            "It does not submit applications and offers no legal guarantees regarding eligibility."
         )
         return {
             **state,
             "final_response": f"No relevant information was found in the uploaded documents for your query.\n\n{disclaimer}",
         }
 
+    # Build eligibility section for the prompt
+    eligibility_result = state.get("eligibility_result", {})
+    eligibility_section = ""
+    if eligibility_result.get("has_thresholds"):
+        eligibility_section = (
+            f"\nELIGIBILITY CHECK RESULTS (from deterministic math tool — treat as DEFINITIVE):\n"
+            f"Summary: {eligibility_result.get('summary', 'N/A')}\n"
+            f"Overall eligible: {eligibility_result.get('all_eligible', 'Unknown')}\n"
+            f"Details: {json.dumps(eligibility_result.get('results', {}), indent=2)}\n"
+        )
+
     prompt = ANSWER_PROMPT.format(
         context=context,
         query=state["user_query"],
         profile=json.dumps(state.get("user_profile", {}), ensure_ascii=False),
         language=state["language"],
+        eligibility_section=eligibility_section,
     )
 
     response = llm.invoke([SystemMessage(content=prompt)])
@@ -227,18 +273,20 @@ def generate_verified_answer(state: SarasarathiState) -> SarasarathiState:
 
 def build_sarathi_graph():
     """
-    Build and compile the Sarasarathi state machine.
+    Build and compile the Sarathi state machine.
 
     Flow:
       analyze_and_extract → decision_router
         ├─ ask_clarification → END
+        └─ retrieve_context → evaluate_eligibility → generate_verified_answer → END
     """
-    graph = StateGraph(SarasarathiState)
+    graph = StateGraph(SarathiState)
 
     # Nodes
     graph.add_node("analyze_and_extract", analyze_and_extract)
     graph.add_node("ask_clarification", ask_clarification)
     graph.add_node("retrieve_context", retrieve_context)
+    graph.add_node("evaluate_eligibility", evaluate_eligibility)
     graph.add_node("generate_verified_answer", generate_verified_answer)
 
     # Entry
@@ -251,13 +299,14 @@ def build_sarathi_graph():
         {
             "ask_clarification": "ask_clarification",
             "retrieve_context": "retrieve_context",
-            "generate_verified_answer": "generate_verified_answer",
+            "evaluate_eligibility": "evaluate_eligibility",
         },
     )
 
     # Linear chain after retrieval
     graph.add_edge("ask_clarification", END)
-    graph.add_edge("retrieve_context", "generate_verified_answer")
+    graph.add_edge("retrieve_context", "evaluate_eligibility")
+    graph.add_edge("evaluate_eligibility", "generate_verified_answer")
     graph.add_edge("generate_verified_answer", END)
 
     return graph.compile()
