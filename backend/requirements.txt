@@ -11,8 +11,12 @@ langchain-community==0.3.24
 langchain-huggingface==0.1.2
 langchain-chroma
 langchain-groq==0.3.2
+langchain-openai==0.3.0
 langchain-text-splitters==0.3.8
 langgraph==0.4.5
+
+# Any Model Inference
+litellm==1.60.2
 
 # Vector database
 chromadb
