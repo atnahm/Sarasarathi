@@ -13,8 +13,8 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Sarathi — Public Scheme Assistant",
-  description: "AI-powered assistant for official government scheme documents. Supports English and Assamese.",
+  title: "Sarasarathi — Open Source Notebook LM",
+  description: "AI-powered research assistant and open-source Notebook LM alternative.",
 };
 
 export default function RootLayout({
