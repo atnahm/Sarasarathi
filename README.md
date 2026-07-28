@@ -1,12 +1,3 @@
----
-title: Sarasarathi
-emoji: 🚀
-colorFrom: blue
-colorTo: indigo
-sdk: docker
-pinned: false
-app_port: 7860
----
 # Sarasarathi: The Open Source Notebook LM Alternative
 
 Sarasarathi is an AI-powered research assistant and open-source alternative to Notebook LM. It allows users to upload documents, connect with open-source and proprietary Large Language Models (LLMs), and chat with their knowledge base using advanced Retrieval-Augmented Generation (RAG).
